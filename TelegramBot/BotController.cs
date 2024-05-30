@@ -59,7 +59,7 @@ namespace TelegramBot
 
             else if (message.Text == "/checklive")
             {
-                var request = new RestRequest($"/GetFixturesAll", Method.Get);
+                var request = new RestRequest($"/APIController/GetFixturesAll", Method.Get);
                 
                 var content = _restClient.Execute<string>(request).Content.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\"", "");
                 await _botClient.SendTextMessageAsync(message.Chat.Id, content);
@@ -122,7 +122,7 @@ namespace TelegramBot
                 if (IsToday)
                 {
                     DateTime date = DateTime.Now;
-                    await _botClient.SendTextMessageAsync(message.Chat.Id, _restClient.Execute<string>(new RestRequest($"/GetFixturesByDate?date={date.ToString("yyyy-MM-dd")}&IsToday={IsToday}", Method.Get)).Content.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\"", ""));
+                    await _botClient.SendTextMessageAsync(message.Chat.Id, _restClient.Execute<string>(new RestRequest($"/APIController/GetFixturesByDate?date={date.ToString("yyyy-MM-dd")}&IsToday={IsToday}", Method.Get)).Content.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\"", ""));
                     return;
                 }
 
@@ -133,7 +133,7 @@ namespace TelegramBot
                     return;
                 }
 
-                var request = new RestRequest($"/GetFixturesByDate?date={answer[1]}&IsToday={IsToday}", Method.Get);
+                var request = new RestRequest($"/APIController/GetFixturesByDate?date={answer[1]}&IsToday={IsToday}", Method.Get);
                 string content = _restClient.Execute<string>(request).Content.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\"", "");
                 
                 
@@ -178,7 +178,7 @@ namespace TelegramBot
                     return;
                 }
 
-                var request = new RestRequest($"{Constants.BaseURL}/GetFixturesByTeamInSeason?teamName={teamName}&season={season}", Method.Get);
+                var request = new RestRequest($"/APIController/GetFixturesByTeamInSeason?teamName={teamName}&season={season}", Method.Get);
                 string content = _restClient.Execute<string>(request).Content.Replace("\\n", "\n").Replace("\\t", "\t").Replace("\"", "");
 
                 await _botClient.SendTextMessageAsync(message.Chat.Id, content);
@@ -204,7 +204,7 @@ namespace TelegramBot
                     teamName += " ";
                 }
             }
-            var request = new RestRequest($"/SaveFavouriteTeam?userId={message.Chat.Id}&teamName={teamName}", Method.Post);
+            var request = new RestRequest($"/DatabaseController/SaveFavouriteTeam?userId={message.Chat.Id}&teamName={teamName}", Method.Post);
             _restClient.Execute(request, Method.Post);
             return;
         }
@@ -221,21 +221,21 @@ namespace TelegramBot
                     teamName += "%20";
                 }
             }
-            var request = new RestRequest($"/ChangeFavouriteTeam?userId={message.Chat.Id}&teamName={teamName}", Method.Put);
+            var request = new RestRequest($"/DatabaseController/ChangeFavouriteTeam?userId={message.Chat.Id}&teamName={teamName}", Method.Put);
             _restClient.Execute(request, Method.Put);
             return;
         }
 
         private async Task DeleteFavouriteTeam(Message message)
         {
-            var request = new RestRequest($"/DeleteFavouriteTeam?userId={message.Chat.Id}", Method.Delete);
+            var request = new RestRequest($"/DatabaseController/DeleteFavouriteTeam?userId={message.Chat.Id}", Method.Delete);
             _restClient.Execute(request, Method.Delete);
             return;
         }
 
         private async Task GetFavouriteTeam(Message message)
         {
-            var request = new RestRequest($"/GetFavouriteTeam?userId={message.Chat.Id}", Method.Get);
+            var request = new RestRequest($"/DatabaseController/GetFavouriteTeam?userId={message.Chat.Id}", Method.Get);
             var content = _restClient.Execute<string>(request, Method.Get).Content.Replace("\"", "" );
             await _botClient.SendTextMessageAsync(message.Chat.Id, content);
             return;
