@@ -84,6 +84,30 @@ namespace TelegramBot
                 return;
             }
 
+            else if (message.Text.StartsWith("/savefavouriteteam"))
+            {
+                await SaveFavouriteTeam(message);
+                return;
+            }
+
+            else if (message.Text.StartsWith("/deletefavouriteteam"))
+            {
+                await DeleteFavouriteTeam(message);
+                return;
+            }
+
+            else if (message.Text.StartsWith("/changefavouriteteam"))
+            {
+                await ChangeFavouriteTeam(message);
+                return;
+            }
+
+            else if (message.Text.StartsWith("/favouriteteam"))
+            {
+                await GetFavouriteTeam(message);
+                return;
+            }
+
             else
             {
                 await _botClient.SendTextMessageAsync(message.Chat.Id, "Невідома команда. Будь ласка використайте команду /help для ознайомлення зі списком доступних команд.");
@@ -168,5 +192,53 @@ namespace TelegramBot
         }
 
 
+        private async Task SaveFavouriteTeam(Message message)
+        {
+            string[] answer = message.Text.Split(" ");
+            string teamName = "";
+            for(int i = 1; i < answer.Length; i++)
+            {
+                teamName += answer[i];
+                if(i < answer.Length)
+                {
+                    teamName += " ";
+                }
+            }
+            var request = new RestRequest($"/SaveFavouriteTeam?userId={message.Chat.Id}&teamName={teamName}", Method.Post);
+            _restClient.Execute(request, Method.Post);
+            return;
+        }
+
+        private async Task ChangeFavouriteTeam(Message message)
+        {
+            string[] answer = message.Text.Split(" ");
+            string teamName = "";
+            for (int i = 1; i < answer.Length; i++)
+            {
+                teamName += answer[i];
+                if (i < answer.Length - 1)
+                {
+                    teamName += "%20";
+                }
+            }
+            var request = new RestRequest($"/ChangeFavouriteTeam?userId={message.Chat.Id}&teamName={teamName}", Method.Put);
+            _restClient.Execute(request, Method.Put);
+            return;
+        }
+
+        private async Task DeleteFavouriteTeam(Message message)
+        {
+            var request = new RestRequest($"/DeleteFavouriteTeam?userId={message.Chat.Id}", Method.Delete);
+            _restClient.Execute(request, Method.Delete);
+            return;
+        }
+
+        private async Task GetFavouriteTeam(Message message)
+        {
+            var request = new RestRequest($"/GetFavouriteTeam?userId={message.Chat.Id}", Method.Get);
+            var content = _restClient.Execute<string>(request, Method.Get).Content.Replace("\"", "" );
+            await _botClient.SendTextMessageAsync(message.Chat.Id, content);
+            return;
+        }
     }
 }
